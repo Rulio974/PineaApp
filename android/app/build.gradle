@@ -1,0 +1,42 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // Le plugin Flutter Gradle doit être appliqué après les plugins Android et Kotlin.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.pineapp"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId = "com.example.pineapp"
+        minSdkVersion flutter.minSdkVersion // Assurez-vous que le minSdkVersion est à 18 pour que flutter_secure_storage fonctionne correctement
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        // Autres configurations spécifiques à l'application
+    }
+
+    buildTypes {
+        release {
+            // Ajoutez ici votre configuration de signature pour la version de production.
+            signingConfig = signingConfigs.debug // Remplacez par la configuration de signature de production
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
