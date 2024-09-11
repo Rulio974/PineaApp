@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:pineapp/views/recon/scan.dart';
 
-class ReconPage extends StatefulWidget {
+class PineApPage extends StatefulWidget {
   final int page;
 
-  ReconPage({required Key key, required this.page}) : super(key: key);
+  PineApPage({required Key key, required this.page}) : super(key: key);
 
   @override
-  ReconPageState createState() => ReconPageState();
+  PineApPageState createState() => PineApPageState();
 }
 
-class ReconPageState extends State<ReconPage> {
+class PineApPageState extends State<PineApPage> {
   int currentPageIndex = 0; // Index de la page actuelle
 
   @override
@@ -31,7 +30,7 @@ class ReconPageState extends State<ReconPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Recon Page"),
+        title: Text("PineAp Page"),
       ),
       body: _buildBody(currentPageIndex), // Affiche la page correcte
     );
@@ -41,10 +40,11 @@ class ReconPageState extends State<ReconPage> {
   Widget _buildBody(int index) {
     switch (index) {
       case 0:
-        return ScanPage(); // Page de scan
+        return Scaffold(
+            body: Center(child: Text("Passive Mode"))); // Page Passive
       case 1:
         return Scaffold(
-            body: Center(child: Text("Handshake Page"))); // Page de handshake
+            body: Center(child: Text("Active Mode"))); // Page Active
       default:
         return Scaffold(
             body: Center(

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:heroicons/heroicons.dart';
 
 class ScanSettingsPage extends StatefulWidget {
   final String initialDuration;
@@ -29,16 +30,20 @@ class _ScanSettingsPageState extends State<ScanSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: NestedScrollView(
-        floatHeaderSlivers:
-            true, // Permet la synchronisation du scroll entre AppBar et le contenu
+        floatHeaderSlivers: true,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
               title: Text("Scan Settings"),
-              pinned: true, // Fixe l'AppBar en haut de l'écran
-              floating: true, // Fait flotter l'AppBar lors du défilement
-              forceElevated:
-                  innerBoxIsScrolled, // Ajoute un effet d'ombre lorsque la box est scrollée
+              pinned: true,
+              floating: true,
+              forceElevated: innerBoxIsScrolled,
+              leading: IconButton(
+                icon: HeroIcon(HeroIcons.arrowLeft),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
             ),
           ];
         },
@@ -81,16 +86,37 @@ class _ScanSettingsPageState extends State<ScanSettingsPage> {
               ),
               const SizedBox(height: 20),
               Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, {
-                      "duration": scanDuration,
-                      "alwaysCaptureHandshakes": alwaysCaptureHandshakes
-                    });
-                  },
-                  child: Text("Save Settings"),
+                  child: GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(16),
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Save Settings",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ),
-              ),
+              ))
+              // Center(
+              //   child: ElevatedButton(
+              //     onPressed: () {
+              //       Navigator.pop(context, {
+              //         "duration": scanDuration,
+              //         "alwaysCaptureHandshakes": alwaysCaptureHandshakes
+              //       });
+              //     },
+              //     child: Text("Save Settings"),
+              //   ),
+              // ),
             ],
           ),
         ),

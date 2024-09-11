@@ -7,7 +7,7 @@ import 'package:pineapp/models/dashboard/cards.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:pineapp/models/dashboard/notifications.dart';
 import 'package:pineapp/models/recon/recon_scan.dart';
-import 'package:pineapp/widgets/customAppBar.dart';
+import 'package:pineapp/widgets/navigation/customAppBar.dart';
 import 'package:pineapp/widgets/dashboard/cards.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -87,7 +87,6 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff4f4f6),
-      appBar: NotificationAppBar("Dashboard", _apiService),
       body: FutureBuilder<List<dynamic>>(
         future: _dashboardFuture,
         builder: (context, snapshot) {
@@ -104,8 +103,6 @@ class _DashboardPageState extends State<DashboardPage> {
                     const SizedBox(height: 20),
                     Skeletonizer(child: _buildStatusCardsSkeleton()),
                     const SizedBox(height: 20),
-                    // Skeletonizer(child: _buildNotificationsSkeleton()),
-                    // const SizedBox(height: 20),
                     Skeletonizer(child: _buildGraphsSkeleton()),
                   ],
                 ),

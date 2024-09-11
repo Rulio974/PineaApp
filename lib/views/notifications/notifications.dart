@@ -100,6 +100,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
     double _width = MediaQuery.sizeOf(context).width;
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: HeroIcon(HeroIcons.arrowLeft), // Choisis l'icône souhaitée
+          onPressed: () {
+            Navigator.pop(context); // Action de retour
+          },
+        ),
         title: const Text("Notifications"),
         actions: [
           IconButton(
