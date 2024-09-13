@@ -52,6 +52,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Pineapple Login Demo',
       theme: ThemeData(
         fontFamily: 'SFProDisplay', // Police configurée

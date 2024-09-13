@@ -30,9 +30,6 @@ class ReconPageState extends State<ReconPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Recon Page"),
-      ),
       body: _buildBody(currentPageIndex), // Affiche la page correcte
     );
   }
