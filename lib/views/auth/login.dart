@@ -109,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                 Container(
                   margin: EdgeInsets.all(16),
                   child: Image.asset(
-                    "assets/logo.jpg",
+                    "assets/logo.png",
                     height: 200,
                   ),
                 ),
