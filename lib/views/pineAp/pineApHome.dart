@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:pineapp/views/pineAp/pineAppPage.dart';
 
-class PineApPage extends StatefulWidget {
+class PineApHome extends StatefulWidget {
   final int page;
 
-  PineApPage({required Key key, required this.page}) : super(key: key);
+  PineApHome({required Key key, required this.page}) : super(key: key);
 
   @override
   PineApPageState createState() => PineApPageState();
 }
 
-class PineApPageState extends State<PineApPage> {
+class PineApPageState extends State<PineApHome> {
   int currentPageIndex = 0; // Index de la page actuelle
 
   @override
@@ -29,9 +30,6 @@ class PineApPageState extends State<PineApPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("PineAp Page"),
-      ),
       body: _buildBody(currentPageIndex), // Affiche la page correcte
     );
   }
@@ -40,8 +38,7 @@ class PineApPageState extends State<PineApPage> {
   Widget _buildBody(int index) {
     switch (index) {
       case 0:
-        return Scaffold(
-            body: Center(child: Text("Passive Mode"))); // Page Passive
+        return PineAPPage(); // Page Passive
       case 1:
         return Scaffold(
             body: Center(child: Text("Active Mode"))); // Page Active

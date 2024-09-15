@@ -49,14 +49,22 @@ class _NotificationAppBarState extends State<NotificationAppBar> {
   }
 
   String _getInitialSubtitle() {
-    if (widget.dropdownType == 2) return 'Passive';
-    if (widget.dropdownType == 3) return 'Scan';
+    if (widget.dropdownType == 2) return 'PineAp';
+    if (widget.dropdownType == 3) return 'Scanning';
     return '';
   }
 
   Map<int, List<String>> dropdownItems = {
-    2: ['Passive', 'Active', 'Advanced', 'Clients', 'Filtering'],
-    3: ['Scan', 'Handshake'],
+    2: [
+      'PineAp',
+      'Open Ap',
+      'Evil WPA',
+      'Entreprise',
+      'Impersonation',
+      'Clients',
+      'Filtering'
+    ],
+    3: ['Scanning', 'Handshake'],
   };
 
   Map<int, String> subtitles = {
@@ -154,42 +162,8 @@ class _NotificationAppBarState extends State<NotificationAppBar> {
           future: widget._apiService.getNotifications(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          NotificationsPage(widget._apiService),
-                    ),
-                  );
-                },
-                icon: const HeroIcon(HeroIcons.bell),
-              );
-            } else if (snapshot.hasError) {
-              return IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          NotificationsPage(widget._apiService),
-                    ),
-                  );
-                },
-                icon: const HeroIcon(HeroIcons.bell),
-              );
-            } else if (snapshot.hasData && snapshot.data != null) {
-              final notifications = snapshot.data!;
-              int notificationCount = notifications.length;
-
-              return custom_badge.Badge(
-                showBadge: notificationCount > 0,
-                position: custom_badge.BadgePosition.topEnd(top: 0, end: 3),
-                badgeContent: Text(
-                  notificationCount.toString(),
-                  style: const TextStyle(color: Colors.white),
-                ),
+              return Container(
+                margin: EdgeInsets.only(right: 10),
                 child: IconButton(
                   onPressed: () {
                     Navigator.push(
@@ -203,6 +177,47 @@ class _NotificationAppBarState extends State<NotificationAppBar> {
                   icon: const HeroIcon(HeroIcons.bell),
                 ),
               );
+            } else if (snapshot.hasError) {
+              return Container(
+                  margin: EdgeInsets.only(right: 10),
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              NotificationsPage(widget._apiService),
+                        ),
+                      );
+                    },
+                    icon: const HeroIcon(HeroIcons.bell),
+                  ));
+            } else if (snapshot.hasData && snapshot.data != null) {
+              final notifications = snapshot.data!;
+              int notificationCount = notifications.length;
+
+              return custom_badge.Badge(
+                  showBadge: notificationCount > 0,
+                  position: custom_badge.BadgePosition.topEnd(top: 0, end: 14),
+                  badgeContent: Text(
+                    notificationCount.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  child: Container(
+                    margin: EdgeInsets.only(right: 10),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                NotificationsPage(widget._apiService),
+                          ),
+                        );
+                      },
+                      icon: const HeroIcon(HeroIcons.bell),
+                    ),
+                  ));
             } else {
               return IconButton(
                 onPressed: () {

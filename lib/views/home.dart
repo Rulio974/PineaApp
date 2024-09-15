@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:pineapp/core/services/api/api_service.dart';
 import 'package:pineapp/views/dashboard/dashboard.dart';
-import 'package:pineapp/views/pineApp/pineApp.dart';
+import 'package:pineapp/views/pineAp/pineApHome.dart';
 import 'package:pineapp/views/recon/recon.dart'; // Page Recon
 import 'package:pineapp/widgets/navigation/customAppBar.dart'; // Page PineAp
 
@@ -16,8 +16,8 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
   int _reconPageIndex = 0;
   int _pineapPageIndex = 0;
-  String _reconSubtitle = 'Scan';
-  String _pineapSubtitle = 'Passive';
+  String _reconSubtitle = 'Scanning';
+  String _pineapSubtitle = 'Open Ap';
   late ApiService _apiService;
   final dio = Dio();
 
@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
   void _onReconPageChanged(int index) {
     setState(() {
       _reconPageIndex = index;
-      _reconSubtitle = index == 0 ? 'Scan' : 'Handshake';
+      _reconSubtitle = index == 0 ? 'Scanning' : 'Handshake';
       _reconPageKey.currentState?.changePage(index);
     });
   }
@@ -42,8 +42,15 @@ class _HomeState extends State<Home> {
   void _onPineapPageChanged(int index) {
     setState(() {
       _pineapPageIndex = index;
-      _pineapSubtitle =
-          ['Passive', 'Active', 'Advanced', 'Clients', 'Filtering'][index];
+      _pineapSubtitle = [
+        'PineAp',
+        'Open Ap',
+        'Evil WPA',
+        'Entreprise',
+        'Impersonation',
+        'Clients',
+        'Filtering'
+      ][index];
       _pineapPageKey.currentState?.changePage(index);
     });
   }
@@ -68,7 +75,7 @@ class _HomeState extends State<Home> {
         children: [
           DashboardPage(),
           Center(child: Text('Campains')),
-          PineApPage(key: _pineapPageKey, page: _pineapPageIndex),
+          PineApHome(key: _pineapPageKey, page: _pineapPageIndex),
           ReconPage(key: _reconPageKey, page: _reconPageIndex),
         ],
       ),
