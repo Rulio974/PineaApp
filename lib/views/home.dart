@@ -14,12 +14,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _currentIndex = 0;
-  int _reconPageIndex = 0; // Index pour gérer la page Recon
-  int _pineapPageIndex = 0; // Index pour gérer la page PineAp
+  int _reconPageIndex = 0;
+  int _pineapPageIndex = 0;
+  String _reconSubtitle = 'Scan';
+  String _pineapSubtitle = 'Passive';
   late ApiService _apiService;
   final dio = Dio();
 
-  // Utilisation de GlobalKey pour accéder à l'état de ReconPage et PineApPage
   final GlobalKey<ReconPageState> _reconPageKey = GlobalKey<ReconPageState>();
   final GlobalKey<PineApPageState> _pineapPageKey =
       GlobalKey<PineApPageState>();
@@ -30,21 +31,20 @@ class _HomeState extends State<Home> {
     _apiService = ApiService(dio, baseUrl: 'http://172.16.42.1:1471');
   }
 
-  // Fonction pour gérer la modification de l'index dans Recon
   void _onReconPageChanged(int index) {
     setState(() {
       _reconPageIndex = index;
-      _reconPageKey.currentState?.changePage(
-          index); // Appelle la méthode changePage dans ReconPageState
+      _reconSubtitle = index == 0 ? 'Scan' : 'Handshake';
+      _reconPageKey.currentState?.changePage(index);
     });
   }
 
-  // Fonction pour gérer la modification de l'index dans PineAp
   void _onPineapPageChanged(int index) {
     setState(() {
       _pineapPageIndex = index;
-      _pineapPageKey.currentState?.changePage(
-          index); // Appelle la méthode changePage dans PineApPageState
+      _pineapSubtitle =
+          ['Passive', 'Active', 'Advanced', 'Clients', 'Filtering'][index];
+      _pineapPageKey.currentState?.changePage(index);
     });
   }
 
@@ -56,19 +56,20 @@ class _HomeState extends State<Home> {
         _apiService,
         currentIndex: _currentIndex,
         onMenuPressed: () {},
-        onDropdownChanged: _currentIndex == 3
-            ? _onReconPageChanged // Si sur Recon, changer l'index pour Recon
-            : _onPineapPageChanged, // Si sur PineAp, changer l'index pour PineAp
-        dropdownType: _currentIndex == 3 ? 3 : 2, // 3 pour Recon, 2 pour PineAp
+        onDropdownChanged:
+            _currentIndex == 3 ? _onReconPageChanged : _onPineapPageChanged,
+        dropdownType: _currentIndex == 3 ? 3 : (_currentIndex == 2 ? 2 : 0),
+        currentSubtitle: _currentIndex == 3
+            ? _reconSubtitle
+            : (_currentIndex == 2 ? _pineapSubtitle : null),
       ),
       body: IndexedStack(
         index: _currentIndex,
         children: [
           DashboardPage(),
           Center(child: Text('Campains')),
-          PineApPage(
-              key: _pineapPageKey, page: _pineapPageIndex), // Page PineAp
-          ReconPage(key: _reconPageKey, page: _reconPageIndex), // Page Recon
+          PineApPage(key: _pineapPageKey, page: _pineapPageIndex),
+          ReconPage(key: _reconPageKey, page: _reconPageIndex),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -76,7 +77,7 @@ class _HomeState extends State<Home> {
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
-            _currentIndex = index; // Change l'index lors du tap
+            _currentIndex = index;
           });
         },
         items: const [

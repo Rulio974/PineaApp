@@ -10,9 +10,9 @@ class NotificationAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final int currentIndex;
   final VoidCallback onMenuPressed;
-  final ValueChanged<int> onDropdownChanged; // Callback pour remonter l'index
-  final int
-      dropdownType; // Ajoute un paramètre pour savoir de quel type de dropdown il s'agit (Recon ou PineAp)
+  final ValueChanged<int> onDropdownChanged;
+  final int dropdownType;
+  final String? currentSubtitle;
 
   NotificationAppBar(
     this.title,
@@ -20,139 +20,135 @@ class NotificationAppBar extends StatefulWidget implements PreferredSizeWidget {
     required this.onMenuPressed,
     required this.currentIndex,
     required this.onDropdownChanged,
-    required this.dropdownType, // Paramètre pour distinguer les dropdowns
+    required this.dropdownType,
+    this.currentSubtitle,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(60); // Hauteur définie
+  Size get preferredSize => const Size.fromHeight(60);
 
   @override
   _NotificationAppBarState createState() => _NotificationAppBarState();
 }
 
 class _NotificationAppBarState extends State<NotificationAppBar> {
-  String selectedSubtitle = ''; // Sous-titre sélectionné
+  late String selectedSubtitle;
 
   @override
   void initState() {
     super.initState();
-    selectedSubtitle = widget.title; // Définit le sous-titre initial
+    selectedSubtitle = widget.currentSubtitle ?? _getInitialSubtitle();
   }
 
-  // Définir les éléments de dropdown en fonction de l'index
-  // Ajoute un paramètre `dropdownType` pour différencier PineAp et Recon
+  @override
+  void didUpdateWidget(NotificationAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentSubtitle != oldWidget.currentSubtitle) {
+      selectedSubtitle = widget.currentSubtitle ?? _getInitialSubtitle();
+    }
+  }
+
+  String _getInitialSubtitle() {
+    if (widget.dropdownType == 2) return 'Passive';
+    if (widget.dropdownType == 3) return 'Scan';
+    return '';
+  }
+
   Map<int, List<String>> dropdownItems = {
-    2: ['Passive', 'Active', 'Advanced', 'Clients', 'Filtering'], // PineAp page
-    3: ['Scan', 'Handshake'], // Recon page
+    2: ['Passive', 'Active', 'Advanced', 'Clients', 'Filtering'],
+    3: ['Scan', 'Handshake'],
   };
 
-  // Map des sous-titres pour chaque page
   Map<int, String> subtitles = {
     2: 'PineAp Suite',
     3: 'Recon Page',
   };
 
-  // Méthode pour gérer la sélection
   void _onDropdownItemSelected(BuildContext context, String value) {
     setState(() {
-      selectedSubtitle = value; // Mise à jour du sous-titre
+      selectedSubtitle = value;
     });
 
-    // Utilisation de widget.dropdownType pour distinguer entre PineAp et Recon
     if (widget.dropdownType == 3) {
-      // Logique pour Recon
-      if (value == 'Scan') {
-        widget.onDropdownChanged(0); // Remonte l'index 0 pour la page "Scan"
-      } else if (value == 'Handshake') {
-        widget
-            .onDropdownChanged(1); // Remonte l'index 1 pour la page "Handshake"
-      }
+      widget.onDropdownChanged(value == 'Scan' ? 0 : 1);
     } else if (widget.dropdownType == 2) {
-      // Logique pour PineAp
-      if (value == 'Passive') {
-        widget.onDropdownChanged(0); // Index pour Passive
-      } else if (value == 'Active') {
-        widget.onDropdownChanged(1); // Index pour Active
-      }
+      widget.onDropdownChanged(dropdownItems[2]!.indexOf(value));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool showDropdown = widget.dropdownType == 2 || widget.dropdownType == 3;
+
     return AppBar(
       backgroundColor: Colors.white,
       leading: IconButton(
         icon: const HeroIcon(HeroIcons.cog6Tooth),
-        onPressed: widget.onMenuPressed, // Ouvre le endDrawer via le callback
+        onPressed: widget.onMenuPressed,
       ),
       centerTitle: true,
-      title: GestureDetector(
-        onTap: () async {
-          final RenderBox renderBox = context.findRenderObject() as RenderBox;
-          final offset = renderBox.localToGlobal(Offset.zero);
+      title: showDropdown
+          ? GestureDetector(
+              onTap: () async {
+                final RenderBox renderBox =
+                    context.findRenderObject() as RenderBox;
+                final offset = renderBox.localToGlobal(Offset.zero);
 
-          // Sélectionne les items en fonction du type de page
-          final selected = await showMenu<String>(
-            context: context,
-            position: RelativeRect.fromLTRB(
-              offset.dx, // Alignement au start du texte
-              offset.dy +
-                  renderBox.size.height +
-                  5, // En dessous avec un petit espace
-              offset.dx +
-                  renderBox.size.width, // Limiter la largeur du menu au texte
-              0, // bas de l'écran
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // Coins arrondis
-            ),
-            items: dropdownItems[widget.dropdownType]!
-                .map((String choice) => PopupMenuItem<String>(
-                      value: choice,
-                      child: Text(choice),
-                    ))
-                .toList(),
-          );
+                final selected = await showMenu<String>(
+                  context: context,
+                  position: RelativeRect.fromLTRB(
+                    offset.dx,
+                    offset.dy + renderBox.size.height + 5,
+                    offset.dx + renderBox.size.width,
+                    0,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  items: dropdownItems[widget.dropdownType]!
+                      .map((String choice) => PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(choice),
+                          ))
+                      .toList(),
+                );
 
-          if (selected != null) {
-            _onDropdownItemSelected(context, selected);
-          }
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start, // Aligner au début
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start, // Alignement au début
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title, // Le titre reste fixe
-                  style: const TextStyle(fontSize: 20),
-                ),
-                if (subtitles.containsKey(widget.dropdownType))
-                  Row(children: [
-                    // Affiche le sous-titre si disponible
-                    Text(
-                      selectedSubtitle.isNotEmpty
-                          ? selectedSubtitle
-                          : subtitles[widget.dropdownType]!,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.start, // Aligné au début
-                    ),
-                    const SizedBox(width: 5),
-                    const HeroIcon(
-                      HeroIcons.chevronDown,
-                      size: 14,
-                      color: Colors.grey,
-                    ),
-                  ]),
-              ],
-            ),
-          ],
-        ),
-      ),
+                if (selected != null) {
+                  _onDropdownItemSelected(context, selected);
+                }
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      Row(children: [
+                        Text(
+                          selectedSubtitle,
+                          style:
+                              const TextStyle(fontSize: 14, color: Colors.grey),
+                          textAlign: TextAlign.start,
+                        ),
+                        const SizedBox(width: 5),
+                        const HeroIcon(
+                          HeroIcons.chevronDown,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ]),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          : Text(widget.title),
       actions: [
         FutureBuilder<List<NotificationItem>>(
           future: widget._apiService.getNotifications(),
