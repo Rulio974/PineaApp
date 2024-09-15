@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:pineapp/core/services/api/api_service.dart';
 import 'package:pineapp/widgets/recon/handshakeCard.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share/share.dart';
 
 class HandshakesPage extends StatefulWidget {
   @override
@@ -38,14 +42,113 @@ class _HandshakesPageState extends State<HandshakesPage> {
     }
   }
 
-  Future<void> _deleteHandshake(int id) async {
-    // Logique de suppression à implémenter
-    print("Supprimer le handshake avec l'id: $id");
+  Future<void> _showDeleteConfirmationDialog(
+      Map<String, dynamic> handshake) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible:
+          true, // Fermer la boîte de dialogue en cliquant à l'extérieur
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmer la suppression'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Voulez-vous vraiment supprimer ce handshake ?'),
+                SizedBox(height: 10),
+                Text('Détails du Handshake:'),
+                Text('MAC Address: ${handshake["mac"]}'),
+                Text('Client: ${handshake["client"]}'),
+                Text('Type: ${handshake["type"]}'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Fermer la boîte de dialogue
+              },
+            ),
+            TextButton(
+              child: Text('Supprimer'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                await _deleteHandshake(handshake["type"],
+                    handshake["mac"]); // Supprimer le handshake
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  Future<void> _downloadHandshake(int id) async {
-    // Logique de téléchargement à implémenter
-    print("Télécharger le handshake avec l'id: $id");
+  Future<void> _deleteHandshake(String type, String bssid) async {
+    try {
+      final dio = Dio();
+      final apiService = ApiService(dio, baseUrl: "http://172.16.42.1:1471");
+
+      // Appeler l'API pour supprimer le handshake
+      final response = await apiService.deleteWPAHandshake({
+        "type": type,
+        "bssid": bssid,
+      });
+
+      // Vérifier la réponse de l'API
+      if (response["success"] == true) {
+        print("Handshake supprimé avec succès");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Handshake supprimé avec succès")),
+        );
+
+        // Rafraîchir la liste des handshakes
+        setState(() {
+          _futureHandshakes = fetchWPAHandshakes();
+        });
+      } else {
+        throw Exception("Échec de la suppression du handshake");
+      }
+    } catch (e) {
+      print("Erreur lors de la suppression du handshake : $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur lors de la suppression du handshake")),
+      );
+    }
+  }
+
+  Future<void> _downloadHandshake(String location) async {
+    try {
+      // Appel de l'API pour télécharger le fichier
+      final dio = Dio();
+      final apiService = ApiService(dio, baseUrl: "http://172.16.42.1:1471");
+
+      // Extraire uniquement le nom du fichier depuis le chemin complet
+      final filename = location.split('/').last;
+      print("FILENAME: $filename");
+
+      // Télécharger le fichier
+      final fileData = await apiService.downloadFile({"filename": location});
+
+      // Récupérer le répertoire de stockage temporaire
+      final directory = await getTemporaryDirectory();
+      // Utiliser uniquement le nom du fichier pour le chemin
+      final filePath = '${directory.path}/$filename';
+      print("File path: $filePath");
+
+      // Écrire le fichier sur le stockage local
+      final file = File(filePath);
+      await file.writeAsBytes(fileData);
+
+      // Ouvrir le modal de partage/téléchargement propre à l'OS
+      Share.shareFiles([file.path],
+          text: 'Télécharger le handshake: $filename');
+    } catch (e) {
+      print("Erreur lors du téléchargement du fichier : $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur lors du téléchargement du fichier")),
+      );
+    }
   }
 
   @override
@@ -79,7 +182,7 @@ class _HandshakesPageState extends State<HandshakesPage> {
                     const SizedBox(height: 16),
                     Dismissible(
                       key: Key(
-                          '${handshakes[0]["mac"]}_${handshakes[0]["client"]}_${handshakes[0]["timestamp"]}'),
+                          '${handshakes[0]["mac"] ?? "unknown_mac"}_${handshakes[0]["client"] ?? "unknown_client"}_${handshakes[0]["timestamp"] ?? "unknown_timestamp"}'),
                       background: Container(
                         color: Colors.red,
                         alignment: Alignment.centerLeft,
@@ -94,10 +197,12 @@ class _HandshakesPageState extends State<HandshakesPage> {
                       ),
                       confirmDismiss: (direction) async {
                         if (direction == DismissDirection.startToEnd) {
-                          await _deleteHandshake(handshakes[0]["id"]);
-                          return true; // Confirmer la suppression
+                          // Afficher la boîte de dialogue de confirmation
+                          await _showDeleteConfirmationDialog(handshakes[0]);
+                          return false; // Ne pas supprimer immédiatement
                         } else if (direction == DismissDirection.endToStart) {
-                          await _downloadHandshake(handshakes[0]["id"]);
+                          await _downloadHandshake(handshakes[0]
+                              ["location"]); // Utiliser le chemin du fichier
                           return false; // Ne pas supprimer, juste télécharger
                         }
                         return false;
@@ -124,7 +229,7 @@ class _HandshakesPageState extends State<HandshakesPage> {
                               borderRadius: BorderRadius.circular(8),
                               child: Dismissible(
                                 key: Key(
-                                    '${handshake["mac"]}_${handshake["client"]}_${handshake["timestamp"]}'),
+                                    '${handshake["mac"] ?? "unknown_mac"}_${handshake["client"] ?? "unknown_client"}_${handshake["timestamp"] ?? "unknown_timestamp"}'),
                                 background: Container(
                                   color: Colors.red,
                                   alignment: Alignment.centerLeft,
@@ -144,11 +249,14 @@ class _HandshakesPageState extends State<HandshakesPage> {
                                 confirmDismiss: (direction) async {
                                   if (direction ==
                                       DismissDirection.startToEnd) {
-                                    await _deleteHandshake(handshake["id"]);
-                                    return true; // Confirmer la suppression
+                                    // Afficher la boîte de dialogue de confirmation
+                                    await _showDeleteConfirmationDialog(
+                                        handshake);
+                                    return false; // Ne pas supprimer immédiatement
                                   } else if (direction ==
                                       DismissDirection.endToStart) {
-                                    await _downloadHandshake(handshake["id"]);
+                                    await _downloadHandshake(handshake[
+                                        "location"]); // Utiliser le chemin du fichier
                                     return false; // Ne pas supprimer, juste télécharger
                                   }
                                   return false;

@@ -89,4 +89,12 @@ abstract class ApiService {
   // Ajout pour récupérer les handshakes capturés
   @GET("/api/pineap/handshakes")
   Future<dynamic> getWPAHandshakes();
+
+  @POST("/api/download")
+  @DioResponseType(
+      ResponseType.bytes) // Spécifie que la réponse est de type binaire
+  Future<List<int>> downloadFile(@Body() Map<String, dynamic> body);
+
+  @DELETE("/api/pineap/handshakes/delete")
+  Future<dynamic> deleteWPAHandshake(@Body() Map<String, dynamic> body);
 }
