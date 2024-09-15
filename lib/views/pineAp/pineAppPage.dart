@@ -13,21 +13,49 @@ class _PineAPPageState extends State<PineAPPage> {
   late Dio dio;
   late ApiService apiService;
 
+  // Variables pour stocker les paramètres
+  bool logPineAPEvents = false;
+  bool captureSSIDsToPool = false;
+  bool clientConnectNotifications = false;
+  bool clientDisconnectNotifications = false;
+  bool advertiseAPImpersonationPool = false;
+  bool impersonateAllNetworks = false; // Pour karma
+  String targetMacAddress = 'FF:FF:FF:FF:FF:FF';
+  String sourceMacAddress = '00:11:22:33:44:55';
+  String mode = "active"; // Mode initial
+
   @override
   void initState() {
     super.initState();
     dio = Dio();
     apiService = ApiService(dio, baseUrl: "http://172.16.42.1:1471");
+    _loadPineAPSettings(); // Charger les paramètres au démarrage
   }
 
   // Charger les paramètres actuels
-  Future<Map<String, dynamic>> _loadPineAPSettings() async {
+  Future<void> _loadPineAPSettings() async {
     try {
       final response = await apiService.getPineAPSettings();
-      return response;
+      setState(() {
+        // Mise à jour des variables avec les données récupérées
+        logPineAPEvents = response['settings']['logging'] ?? false;
+        captureSSIDsToPool = response['settings']['capture_ssids'] ?? false;
+        clientConnectNotifications =
+            response['settings']['connect_notifications'] ?? false;
+        clientDisconnectNotifications =
+            response['settings']['disconnect_notifications'] ?? false;
+        advertiseAPImpersonationPool =
+            response['settings']['broadcast_ssid_pool'] ?? false;
+        impersonateAllNetworks = response['settings']['karma'] ?? false;
+        targetMacAddress =
+            response['settings']['target_mac'] ?? 'FF:FF:FF:FF:FF:FF';
+        sourceMacAddress =
+            response['settings']['pineap_mac'] ?? '00:11:22:33:44:55';
+        mode = response['mode']?.toLowerCase() ??
+            'active'; // Assurez-vous que mode est en minuscules
+      });
     } catch (e) {
       print("Erreur lors du chargement des paramètres : $e");
-      return {}; // En cas d'erreur, on retourne un map vide
     }
   }
 
@@ -35,208 +63,178 @@ class _PineAPPageState extends State<PineAPPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff4f4f6),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _loadPineAPSettings(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError ||
-              !snapshot.hasData ||
-              snapshot.data!.isEmpty) {
-            return Center(
-                child: Text('Erreur lors du chargement des paramètres.'));
-          } else {
-            final data = snapshot.data!;
-            final impersonateAllNetworks = data['karma'] ?? false;
-            final selectedOptions = _extractOptions(data);
-
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 16),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Statistics", style: TextStyle(fontSize: 24)),
-                          SizedBox(height: 10),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      height: 120,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          const SizedBox(width: 16),
-                          _buildInfoCard(
-                              'Total SSIDs',
-                              '1',
-                              const HeroIcon(
-                                HeroIcons.wifi,
-                                color: Colors.deepPurpleAccent,
-                              )),
-                          _buildInfoCard(
-                              'Clients Connected',
-                              '0',
-                              const HeroIcon(
-                                HeroIcons.user,
-                                color: Colors.redAccent,
-                              )),
-                          _buildInfoCard(
-                              'Handshakes Captured',
-                              '2',
-                              const HeroIcon(
-                                HeroIcons.cubeTransparent,
-                                color: Colors.indigo,
-                              )),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("PineAp", style: TextStyle(fontSize: 24)),
-                          SizedBox(height: 10),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Card(
-                        elevation: 0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(children: [
-                                Text(
-                                  'Advanced Mode', // Statique car basé sur les options
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Expanded(child: SizedBox()),
-                                const HeroIcon(
-                                  HeroIcons.adjustmentsVertical,
-                                  color: Colors.green,
-                                ),
-                              ]),
-                              const SizedBox(height: 30),
-                              // Afficher toutes les options pour le mode Advanced
-                              Wrap(
-                                spacing: 8.0,
-                                runSpacing: 10.0,
-                                children: [
-                                  _buildOptionChip('Impersonate All Networks',
-                                      impersonateAllNetworks),
-                                  _buildOptionChip(
-                                      'Log PineAP Events',
-                                      selectedOptions
-                                          .contains('Log PineAP Events')),
-                                  _buildOptionChip(
-                                      'Capture SSIDs to Pool',
-                                      selectedOptions
-                                          .contains('Capture SSIDs to Pool')),
-                                  _buildOptionChip(
-                                      'Client Connect Notifications',
-                                      selectedOptions.contains(
-                                          'Client Connect Notifications')),
-                                  _buildOptionChip(
-                                      'Client Disconnect Notifications',
-                                      selectedOptions.contains(
-                                          'Client Disconnect Notifications')),
-                                  _buildOptionChip(
-                                      'Advertise AP Impersonation Pool',
-                                      selectedOptions.contains(
-                                          'Advertise AP Impersonation Pool')),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              Align(
-                                alignment: Alignment.bottomLeft,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blueGrey,
-                                    textStyle: const TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                    ),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          8), // Radius de 8
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    final result = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            PineAPSettingsPage(),
-                                      ),
-                                    );
-
-                                    // Recharger les paramètres après modification
-                                    if (result != null) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.edit,
-                                          color: Colors.white),
-                                      const SizedBox(width: 8),
-                                      const Text('Edit PineAP Settings'),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 400,
-                      width: double.infinity,
-                      margin: EdgeInsets.all(16),
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    )
+                    Text("Statistics", style: TextStyle(fontSize: 24)),
+                    SizedBox(height: 10),
                   ],
                 ),
               ),
-            );
-          }
-        },
+              SizedBox(
+                height: 120,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    const SizedBox(width: 16),
+                    _buildInfoCard(
+                      'Total SSIDs',
+                      '1',
+                      const HeroIcon(
+                        HeroIcons.wifi,
+                        color: Colors.deepPurpleAccent,
+                      ),
+                    ),
+                    _buildInfoCard(
+                      'Clients Connected',
+                      '0',
+                      const HeroIcon(
+                        HeroIcons.user,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                    _buildInfoCard(
+                      'Handshakes Captured',
+                      '2',
+                      const HeroIcon(
+                        HeroIcons.cubeTransparent,
+                        color: Colors.indigo,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("PineAp", style: TextStyle(fontSize: 24)),
+                    SizedBox(height: 10),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Card(
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          Text(
+                            'Advanced Mode', // Statique car basé sur les options
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Expanded(child: SizedBox()),
+                          const HeroIcon(
+                            HeroIcons.adjustmentsVertical,
+                            color: Colors.green,
+                          ),
+                        ]),
+                        const SizedBox(height: 30),
+                        // Afficher toutes les options pour le mode Advanced
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 10.0,
+                          children: [
+                            _buildOptionChip(
+                              'Impersonate All Networks',
+                              impersonateAllNetworks,
+                            ),
+                            _buildOptionChip(
+                              'Log PineAP Events',
+                              logPineAPEvents,
+                            ),
+                            _buildOptionChip(
+                              'Capture SSIDs to Pool',
+                              captureSSIDsToPool,
+                            ),
+                            _buildOptionChip(
+                              'Client Connect Notifications',
+                              clientConnectNotifications,
+                            ),
+                            _buildOptionChip(
+                              'Client Disconnect Notifications',
+                              clientDisconnectNotifications,
+                            ),
+                            _buildOptionChip(
+                              'Advertise AP Impersonation Pool',
+                              advertiseAPImpersonationPool,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueGrey,
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(8), // Radius de 8
+                              ),
+                            ),
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PineAPSettingsPage(),
+                                ),
+                              );
+
+                              // Recharger les paramètres après modification
+                              if (result != null) {
+                                _loadPineAPSettings(); // Recharger les paramètres après retour
+                              }
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.edit, color: Colors.white),
+                                const SizedBox(width: 8),
+                                const Text('Edit PineAP Settings'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                height: 400,
+                width: double.infinity,
+                margin: EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
-  }
-
-  // Extraire les options à partir de la réponse
-  List<String> _extractOptions(Map<String, dynamic> settings) {
-    List<String> options = [];
-    if (settings['logging'] == true) options.add('Log PineAP Events');
-    if (settings['capture_ssids'] == true) options.add('Capture SSIDs to Pool');
-    if (settings['connect_notifications'] == true)
-      options.add('Client Connect Notifications');
-    if (settings['disconnect_notifications'] == true)
-      options.add('Client Disconnect Notifications');
-    if (settings['broadcast_ssid_pool'] == true)
-      options.add('Advertise AP Impersonation Pool');
-    return options;
   }
 
   // Widget pour les options

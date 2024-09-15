@@ -223,20 +223,24 @@ class _PineAPSettingsPageState extends State<PineAPSettingsPage> {
     try {
       final settingsData = {
         "mode": mode,
-        "enablePineAP": true,
-        "AutoStart": false,
-        "ap_channel": 6,
-        "beacon_interval": 100,
-        "beacon_response_interval": 100,
-        "beacon_responses": true,
-        "broadcast_ssid_pool": advertiseAPImpersonationPool,
-        "capture_ssids": captureSSIDsToPool,
-        "connect_notifications": clientConnectNotifications,
-        "disconnect_notifications": clientDisconnectNotifications,
-        "karma": true,
-        "logging": logPineAPEvents,
-        "pineap_mac": sourceMacAddress,
-        "target_mac": targetMacAddress,
+        "settings": {
+          "enablePineAP": true,
+          "autostartPineAP": true,
+          "armedPineAP": false,
+          "ap_channel": "6",
+          "karma": true,
+          "logging": logPineAPEvents,
+          "connect_notifications": clientConnectNotifications,
+          "disconnect_notifications": clientDisconnectNotifications,
+          "capture_ssids": captureSSIDsToPool,
+          "beacon_responses": true,
+          "broadcast_ssid_pool": advertiseAPImpersonationPool,
+          "broadcast_ssid_pool_random": false,
+          "pineap_mac": sourceMacAddress,
+          "target_mac": targetMacAddress,
+          "beacon_response_interval": "NORMAL",
+          "beacon_interval": "NORMAL"
+        }
       };
 
       print("Données envoyées à l'API : $settingsData");
