@@ -5,7 +5,7 @@
 # PineApp - Unofficial Mobile Controller for WiFi Pineapple
 
 <p align="center">
-  <img src="./assets/screenshots/mockup.png" alt="Screenshot 1" width="50%" />
+  <img src="./assets/screenshots/mockup.png" alt="Screenshot 1" width="100%" />
 </p>
 
 **PineApp** is an **unofficial mobile application** designed to seamlessly control your WiFi Pineapple device from the convenience of your smartphone. Built using **Flutter**, PineApp offers a sleek and responsive interface that brings the power of the Pineapple right to your pocket.
