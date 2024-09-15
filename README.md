@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/logo.png" alt="PineApp Logo" width="25%" />
+  <img src="./assets/logo.png" alt="PineApp Logo" width="70%" />
 </p>
 
 # PineApp - Unofficial Mobile Controller for WiFi Pineapple
