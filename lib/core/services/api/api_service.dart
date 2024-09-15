@@ -91,10 +91,17 @@ abstract class ApiService {
   Future<dynamic> getWPAHandshakes();
 
   @POST("/api/download")
-  @DioResponseType(
-      ResponseType.bytes) // Spécifie que la réponse est de type binaire
+  @DioResponseType(ResponseType.bytes)
   Future<List<int>> downloadFile(@Body() Map<String, dynamic> body);
 
   @DELETE("/api/pineap/handshakes/delete")
   Future<dynamic> deleteWPAHandshake(@Body() Map<String, dynamic> body);
+
+  // Obtenir les paramètres PineAP
+  @GET("/api/pineap/settings")
+  Future<dynamic> getPineAPSettings();
+
+  // Sauvegarder les paramètres PineAP
+  @PUT("/api/pineap/settings")
+  Future<dynamic> savePineAPSettings(@Body() Map<String, dynamic> body);
 }
