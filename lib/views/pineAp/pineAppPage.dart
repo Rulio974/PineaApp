@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:heroicons/heroicons.dart';
+import 'package:pineapp/views/pineAp/pineAPSettings.dart';
 
 class PineAPPage extends StatefulWidget {
   @override
@@ -7,7 +9,7 @@ class PineAPPage extends StatefulWidget {
 
 class _PineAPPageState extends State<PineAPPage> {
   // Variables pour stocker l'état des paramètres sélectionnés
-  String pineAPMode = "Passive";
+  String pineAPMode = "Active";
   bool impersonateAllNetworks = false;
   List<String> selectedOptions = [];
 
@@ -38,9 +40,27 @@ class _PineAPPageState extends State<PineAPPage> {
                 scrollDirection: Axis.horizontal,
                 children: [
                   const SizedBox(width: 16),
-                  _buildInfoCard('Total SSIDs', '1'),
-                  _buildInfoCard('Clients Connected', '0'),
-                  _buildInfoCard('Handshakes Captured', '2'),
+                  _buildInfoCard(
+                      'Total SSIDs',
+                      '1',
+                      const HeroIcon(
+                        HeroIcons.wifi,
+                        color: Colors.deepPurpleAccent,
+                      )),
+                  _buildInfoCard(
+                      'Clients Connected',
+                      '0',
+                      const HeroIcon(
+                        HeroIcons.user,
+                        color: Colors.redAccent,
+                      )),
+                  _buildInfoCard(
+                      'Handshakes Captured',
+                      '2',
+                      const HeroIcon(
+                        HeroIcons.cubeTransparent,
+                        color: Colors.indigo,
+                      )),
                 ],
               ),
             ),
@@ -66,14 +86,30 @@ class _PineAPPageState extends State<PineAPPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'PineAP',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
+                      Row(children: [
+                        Text(
+                          '$pineAPMode Mode',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(child: SizedBox()),
+                        if (pineAPMode == "Advanced")
+                          const HeroIcon(
+                            HeroIcons.adjustmentsVertical,
+                            color: Colors.green,
+                          ),
+                        if (pineAPMode == "Active")
+                          const HeroIcon(
+                            HeroIcons.bolt,
+                            color: Colors.lime,
+                          ),
+                        if (pineAPMode == "Passive")
+                          const HeroIcon(
+                            HeroIcons.boltSlash,
+                            color: Colors.blueGrey,
+                          ),
+                      ]),
                       const SizedBox(height: 10),
-                      Text('Mode: $pineAPMode'),
-                      const SizedBox(height: 5),
                       Text(
                           'Impersonate All Networks: ${impersonateAllNetworks ? "Enabled" : "Disabled"}'),
                       const SizedBox(height: 5),
@@ -119,7 +155,7 @@ class _PineAPPageState extends State<PineAPPage> {
   }
 
   // Widget pour les cartes de statistiques
-  Widget _buildInfoCard(String title, String count) {
+  Widget _buildInfoCard(String title, String count, HeroIcon icon) {
     return Container(
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.all(20),
@@ -131,100 +167,24 @@ class _PineAPPageState extends State<PineAPPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
+          Row(children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+              ),
             ),
-          ),
+            const SizedBox(width: 30),
+            icon,
+          ]),
           const SizedBox(height: 10),
           Text(
             count,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class PineAPSettingsPage extends StatefulWidget {
-  final String mode;
-  final bool impersonate;
-  final List<String> options;
-
-  PineAPSettingsPage({
-    required this.mode,
-    required this.impersonate,
-    required this.options,
-  });
-
-  @override
-  _PineAPSettingsPageState createState() => _PineAPSettingsPageState();
-}
-
-class _PineAPSettingsPageState extends State<PineAPSettingsPage> {
-  late String mode;
-  late bool impersonate;
-  late List<String> options;
-
-  @override
-  void initState() {
-    super.initState();
-    mode = widget.mode;
-    impersonate = widget.impersonate;
-    options = widget.options;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Modifier PineAP Settings'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            DropdownButton<String>(
-              value: mode,
-              onChanged: (String? newValue) {
-                setState(() {
-                  mode = newValue!;
-                });
-              },
-              items: <String>['Passive', 'Active', 'Advanced']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            SwitchListTile(
-              title: const Text('Impersonate All Networks'),
-              value: impersonate,
-              onChanged: (bool value) {
-                setState(() {
-                  impersonate = value;
-                });
-              },
-            ),
-            // Placeholder pour d'autres paramètres
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, {
-                  'mode': mode,
-                  'impersonate': impersonate,
-                  'options': options,
-                });
-              },
-              child: const Text('Sauvegarder'),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -78,7 +78,7 @@ class _NotificationAppBarState extends State<NotificationAppBar> {
     });
 
     if (widget.dropdownType == 3) {
-      widget.onDropdownChanged(value == 'Scan' ? 0 : 1);
+      widget.onDropdownChanged(value == 'Scanning' ? 0 : 1);
     } else if (widget.dropdownType == 2) {
       widget.onDropdownChanged(dropdownItems[2]!.indexOf(value));
     }
