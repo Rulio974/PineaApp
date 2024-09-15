@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:pineapp/core/services/api/api_service.dart';
+import 'package:pineapp/widgets/recon/handshakeCard.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:dio/dio.dart';
 
 class HandshakesPage extends StatefulWidget {
   @override
@@ -25,6 +27,7 @@ class _HandshakesPageState extends State<HandshakesPage> {
       final response = await apiService.getWPAHandshakes();
 
       List<dynamic> handshakes = response["handshakes"];
+      print(handshakes);
       handshakes.sort((a, b) => DateTime.parse(b["timestamp"])
           .compareTo(DateTime.parse(a["timestamp"])));
 
@@ -35,74 +38,136 @@ class _HandshakesPageState extends State<HandshakesPage> {
     }
   }
 
+  Future<void> _deleteHandshake(int id) async {
+    // Logique de suppression à implémenter
+    print("Supprimer le handshake avec l'id: $id");
+  }
+
+  Future<void> _downloadHandshake(int id) async {
+    // Logique de téléchargement à implémenter
+    print("Télécharger le handshake avec l'id: $id");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: FutureBuilder<List<dynamic>>(
-          future: _futureHandshakes,
-          builder: (context, snapshot) {
-            // Pendant que les données se chargent
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
-            // Si une erreur s'est produite
-            else if (snapshot.hasError) {
-              return Center(child: Text('Erreur : ${snapshot.error}'));
-            }
-            // Quand les données sont prêtes
-            else if (snapshot.hasData) {
-              final handshakes = snapshot.data!;
+      backgroundColor: const Color(0xfff4f4f6),
+      body: FutureBuilder<List<dynamic>>(
+        future: _futureHandshakes,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Erreur : ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            final handshakes = snapshot.data!;
 
-              if (handshakes.isEmpty) {
-                return Center(child: Text('Aucun handshake capturé.'));
-              }
+            if (handshakes.isEmpty) {
+              return const Center(child: Text('Aucun handshake capturé.'));
+            }
 
-              // Afficher la liste des handshakes capturés
-              return Padding(
-                padding: EdgeInsets.all(16),
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Last captured handshakes"),
-                    SizedBox(height: 16),
-                    Container(
-                      height: 100,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Column(
-                        children: [
-                          Text(
-                              "Last captured handshake ${handshakes[0]["mac"]}")
-                        ],
-                      ),
+                    const Text(
+                      "Last captured handshake",
+                      style: TextStyle(fontSize: 20),
                     ),
-                    SizedBox(height: 16),
-                    Text("Captured handshakes"),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                    Dismissible(
+                      key: Key(
+                          '${handshakes[0]["mac"]}_${handshakes[0]["client"]}_${handshakes[0]["timestamp"]}'),
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      secondaryBackground: Container(
+                        color: Colors.blue,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: const Icon(Icons.download, color: Colors.white),
+                      ),
+                      confirmDismiss: (direction) async {
+                        if (direction == DismissDirection.startToEnd) {
+                          await _deleteHandshake(handshakes[0]["id"]);
+                          return true; // Confirmer la suppression
+                        } else if (direction == DismissDirection.endToStart) {
+                          await _downloadHandshake(handshakes[0]["id"]);
+                          return false; // Ne pas supprimer, juste télécharger
+                        }
+                        return false;
+                      },
+                      child: HandshakeCard(handshake: handshakes[0]),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Captured handshakes",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    const SizedBox(height: 16),
                     ListView.builder(
                       shrinkWrap: true,
-                      itemCount: handshakes.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount:
+                          handshakes.length - 1, // Excluding the first item
                       itemBuilder: (context, index) {
-                        final handshake = handshakes[index];
-                        return ListTile(
-                          leading: Icon(Icons.wifi),
-                          title: Text('Handshake ${index + 1}'),
-                          subtitle: Text(
-                              'MAC: ${handshake["mac"]}\nClient: ${handshake["client"]}\nType: ${handshake["type"]}\nTimestamp: ${timeago.format(DateTime.parse(handshake["timestamp"]))}'),
+                        final handshake =
+                            handshakes[index + 1]; // Start from the second item
+                        return Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Dismissible(
+                                key: Key(
+                                    '${handshake["mac"]}_${handshake["client"]}_${handshake["timestamp"]}'),
+                                background: Container(
+                                  color: Colors.red,
+                                  alignment: Alignment.centerLeft,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: const Icon(Icons.delete,
+                                      color: Colors.white),
+                                ),
+                                secondaryBackground: Container(
+                                  color: Colors.blue,
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: const Icon(Icons.download,
+                                      color: Colors.white),
+                                ),
+                                confirmDismiss: (direction) async {
+                                  if (direction ==
+                                      DismissDirection.startToEnd) {
+                                    await _deleteHandshake(handshake["id"]);
+                                    return true; // Confirmer la suppression
+                                  } else if (direction ==
+                                      DismissDirection.endToStart) {
+                                    await _downloadHandshake(handshake["id"]);
+                                    return false; // Ne pas supprimer, juste télécharger
+                                  }
+                                  return false;
+                                },
+                                child: HandshakeCard(handshake: handshake),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
                         );
                       },
                     ),
                   ],
                 ),
-              );
-            }
-            // Cas par défaut, au cas où snapshot.data serait null
-            return Center(child: Text('Aucun résultat trouvé.'));
-          },
-        ),
+              ),
+            );
+          }
+          return const Center(child: Text('Aucun résultat trouvé.'));
+        },
       ),
     );
   }
