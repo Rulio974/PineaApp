@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pineapp/views/recon/handshakes.dart';
 import 'package:pineapp/views/recon/scan.dart';
 
 class ReconPage extends StatefulWidget {
@@ -40,10 +41,9 @@ class ReconPageState extends State<ReconPage> {
       case 0:
         return ScanPage(); // Page de scan
       case 1:
-        return Scaffold(
-            body: Center(child: Text("Handshake Page"))); // Page de handshake
+        return HandshakesPage(); // Page de handshake
       default:
-        return Scaffold(
+        return const Scaffold(
             body: Center(
                 child: Text("Error"))); // Page par défaut en cas d'erreur
     }

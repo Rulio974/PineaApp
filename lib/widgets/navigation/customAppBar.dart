@@ -86,7 +86,7 @@ class _NotificationAppBarState extends State<NotificationAppBar> {
         icon: const HeroIcon(HeroIcons.cog6Tooth),
         onPressed: widget.onMenuPressed,
       ),
-      centerTitle: true,
+      centerTitle: false,
       title: showDropdown
           ? GestureDetector(
               onTap: () async {
