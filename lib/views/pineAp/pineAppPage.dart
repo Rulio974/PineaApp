@@ -9,20 +9,24 @@ class PineAPPage extends StatefulWidget {
 
 class _PineAPPageState extends State<PineAPPage> {
   // Variables pour stocker l'état des paramètres sélectionnés
-  String pineAPMode = "Active";
-  bool impersonateAllNetworks = false;
-  List<String> selectedOptions = [];
+  String pineAPMode = "Advanced";
+  bool impersonateAllNetworks = true;
+  List<String> selectedOptions = [
+    "Log PineAP Events",
+    "Capture SSIDs to Pool",
+    "Client Connect Notifications",
+    "Client Disconnect Notifications"
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff4f4f6),
       body: Padding(
-        padding: const EdgeInsets.only(top: 16), // Pas de padding sur la gauche
+        padding: const EdgeInsets.only(top: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Appliquer le padding ici
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -33,9 +37,8 @@ class _PineAPPageState extends State<PineAPPage> {
                 ],
               ),
             ),
-            // ListView horizontale pour les statistiques sans padding
             SizedBox(
-              height: 120, // Hauteur de la ListView
+              height: 120,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -65,7 +68,6 @@ class _PineAPPageState extends State<PineAPPage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Appliquer le padding ici
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -76,7 +78,6 @@ class _PineAPPageState extends State<PineAPPage> {
                 ],
               ),
             ),
-            // Appliquer le padding ici
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Card(
@@ -109,39 +110,81 @@ class _PineAPPageState extends State<PineAPPage> {
                             color: Colors.blueGrey,
                           ),
                       ]),
-                      const SizedBox(height: 10),
-                      Text(
-                          'Impersonate All Networks: ${impersonateAllNetworks ? "Enabled" : "Disabled"}'),
-                      const SizedBox(height: 5),
-                      Text('Options: ${selectedOptions.join(", ")}'),
+                      const SizedBox(height: 30),
+                      if (pineAPMode == "Advanced") ...[
+                        // Afficher toutes les options pour le mode Advanced
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 10.0,
+                          children: [
+                            _buildOptionChip('Impersonate All Networks',
+                                impersonateAllNetworks),
+                            _buildOptionChip('Log PineAP Events',
+                                selectedOptions.contains('Log PineAP Events')),
+                            _buildOptionChip(
+                                'Capture SSIDs to Pool',
+                                selectedOptions
+                                    .contains('Capture SSIDs to Pool')),
+                            _buildOptionChip(
+                                'Client Connect Notifications',
+                                selectedOptions
+                                    .contains('Client Connect Notifications')),
+                            _buildOptionChip(
+                                'Client Disconnect Notifications',
+                                selectedOptions.contains(
+                                    'Client Disconnect Notifications')),
+                            _buildOptionChip(
+                                'Advertise AP Impersonation Pool',
+                                selectedOptions.contains(
+                                    'Advertise AP Impersonation Pool')),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       Align(
-                        alignment: Alignment.bottomRight,
+                        alignment: Alignment.bottomLeft,
                         child: ElevatedButton(
-                          onPressed: () async {
-                            // Naviguer vers la page des paramètres et récupérer les valeurs
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PineAPSettingsPage(
-                                  mode: pineAPMode,
-                                  impersonate: impersonateAllNetworks,
-                                  options: selectedOptions,
-                                ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueGrey,
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
                               ),
-                            );
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(8), // Radius de 8
+                              ),
+                            ),
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PineAPSettingsPage(
+                                    mode: pineAPMode,
+                                    impersonate: impersonateAllNetworks,
+                                    options: selectedOptions,
+                                  ),
+                                ),
+                              );
 
-                            // Mettre à jour l'état avec les valeurs récupérées
-                            if (result != null) {
-                              setState(() {
-                                pineAPMode = result['mode'];
-                                impersonateAllNetworks = result['impersonate'];
-                                selectedOptions = result['options'];
-                              });
-                            }
-                          },
-                          child: const Text('Modifier'),
-                        ),
+                              // Mettre à jour l'état avec les valeurs récupérées
+                              if (result != null) {
+                                setState(() {
+                                  pineAPMode = result['mode'];
+                                  impersonateAllNetworks =
+                                      result['impersonate'];
+                                  selectedOptions = result['options'];
+                                });
+                              }
+                            },
+                            child: const Row(
+                              children: [
+                                Text('Edit PineAP Settings'),
+                                Expanded(child: SizedBox()),
+                                HeroIcon(HeroIcons.pencil)
+                              ],
+                            )),
                       ),
                     ],
                   ),
@@ -151,6 +194,18 @@ class _PineAPPageState extends State<PineAPPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildOptionChip(String label, bool isActive) {
+    return Row(
+      children: [
+        if (isActive)
+          const HeroIcon(HeroIcons.checkCircle, color: Colors.green),
+        if (!isActive) const HeroIcon(HeroIcons.xCircle, color: Colors.red),
+        const SizedBox(width: 8),
+        Text(label),
+      ],
     );
   }
 

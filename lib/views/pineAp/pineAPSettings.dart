@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart'; // Importer Cupertino
+import 'package:flutter/cupertino.dart';
 
 class PineAPSettingsPage extends StatefulWidget {
   final String mode;
@@ -21,7 +21,7 @@ class _PineAPSettingsPageState extends State<PineAPSettingsPage> {
   late bool impersonate;
   late List<String> options;
 
-  // Options spécifiques
+  // Options spécifiques pour le mode Advanced
   bool logPineAPEvents = false;
   bool captureSSIDsToPool = false;
   bool clientConnectNotifications = false;
@@ -38,6 +38,16 @@ class _PineAPSettingsPageState extends State<PineAPSettingsPage> {
     mode = widget.mode;
     impersonate = widget.impersonate;
     options = widget.options;
+
+    // Initialiser les options en fonction des valeurs existantes
+    logPineAPEvents = options.contains("Log PineAP Events");
+    captureSSIDsToPool = options.contains("Capture SSIDs to Pool");
+    clientConnectNotifications =
+        options.contains("Client Connect Notifications");
+    clientDisconnectNotifications =
+        options.contains("Client Disconnect Notifications");
+    advertiseAPImpersonationPool =
+        options.contains("Advertise AP Impersonation Pool");
   }
 
   @override
@@ -66,123 +76,112 @@ class _PineAPSettingsPageState extends State<PineAPSettingsPage> {
                 );
               }).toList(),
             ),
-            // CupertinoSwitch pour impersonate all networks
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Impersonate All Networks'),
-                CupertinoSwitch(
-                  value: impersonate,
-                  onChanged: (bool value) {
-                    setState(() {
-                      impersonate = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-            // Options spécifiques en fonction du mode
-            if (mode == 'Passive' ||
-                mode == 'Active' ||
-                mode == 'Advanced') ...[
-              if (mode != 'Passive') // Options pour Active et Advanced
-                Column(
-                  children: [
-                    _buildCupertinoSwitch(
-                      'Log PineAP Events',
-                      logPineAPEvents,
-                      (bool value) {
-                        setState(() {
-                          logPineAPEvents = value;
-                        });
-                      },
-                    ),
-                    _buildCupertinoSwitch(
-                      'Capture SSIDs To Pool',
-                      captureSSIDsToPool,
-                      (bool value) {
-                        setState(() {
-                          captureSSIDsToPool = value;
-                        });
-                      },
-                    ),
-                    _buildCupertinoSwitch(
-                      'Advertise AP Impersonation Pool',
-                      advertiseAPImpersonationPool,
-                      (bool value) {
-                        setState(() {
-                          advertiseAPImpersonationPool = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              if (mode == 'Advanced') // Options spécifiques à Advanced
-                Column(
-                  children: [
-                    _buildCupertinoSwitch(
-                      'Client Connect Notifications',
-                      clientConnectNotifications,
-                      (bool value) {
-                        setState(() {
-                          clientConnectNotifications = value;
-                        });
-                      },
-                    ),
-                    _buildCupertinoSwitch(
-                      'Client Disconnect Notifications',
-                      clientDisconnectNotifications,
-                      (bool value) {
-                        setState(() {
-                          clientDisconnectNotifications = value;
-                        });
-                      },
-                    ),
-                    // Dropdown pour Broadcast Pool Interval
-                    DropdownButton<String>(
-                      value: broadcastPoolInterval,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          broadcastPoolInterval = newValue!;
-                        });
-                      },
-                      items: <String>['Normal', 'Low', 'High', 'Maximum']
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                    // Champs pour les adresses MAC
-                    TextFormField(
-                      initialValue: targetMacAddress,
-                      decoration:
-                          InputDecoration(labelText: 'Target MAC Address'),
-                      onChanged: (value) {
-                        targetMacAddress = value;
-                      },
-                    ),
-                    TextFormField(
-                      initialValue: sourceMacAddress,
-                      decoration:
-                          InputDecoration(labelText: 'Source MAC Address'),
-                      onChanged: (value) {
-                        sourceMacAddress = value;
-                      },
-                    ),
-                    _buildCupertinoSwitch(
-                      'Randomize Source MAC',
-                      randomizeSourceMAC,
-                      (bool value) {
-                        setState(() {
-                          randomizeSourceMAC = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
+            if (mode == 'Passive' || mode == 'Active') ...[
+              // Texte descriptif pour Passive et Active
+              const SizedBox(height: 20),
+              Text(
+                mode == 'Passive'
+                    ? 'In Passive Mode, the following PineAP features are enabled:\n\n• SSID Pool Collection\n• Event Logging'
+                    : 'In Active Mode, the following PineAP features are enabled:\n\n• SSID Pool Collection\n• Event Logging\n• SSID Pool Broadcasting',
+                style: TextStyle(fontSize: 16),
+              ),
+            ] else if (mode == 'Advanced') ...[
+              // Options spécifiques pour Advanced
+              const SizedBox(height: 20),
+              _buildCupertinoSwitch(
+                'Log PineAP Events',
+                logPineAPEvents,
+                (bool value) {
+                  setState(() {
+                    logPineAPEvents = value;
+                    _updateOptionsList('Log PineAP Events', value);
+                  });
+                },
+              ),
+              _buildCupertinoSwitch(
+                'Capture SSIDs To Pool',
+                captureSSIDsToPool,
+                (bool value) {
+                  setState(() {
+                    captureSSIDsToPool = value;
+                    _updateOptionsList('Capture SSIDs to Pool', value);
+                  });
+                },
+              ),
+              _buildCupertinoSwitch(
+                'Advertise AP Impersonation Pool',
+                advertiseAPImpersonationPool,
+                (bool value) {
+                  setState(() {
+                    advertiseAPImpersonationPool = value;
+                    _updateOptionsList(
+                        'Advertise AP Impersonation Pool', value);
+                  });
+                },
+              ),
+              _buildCupertinoSwitch(
+                'Client Connect Notifications',
+                clientConnectNotifications,
+                (bool value) {
+                  setState(() {
+                    clientConnectNotifications = value;
+                    _updateOptionsList('Client Connect Notifications', value);
+                  });
+                },
+              ),
+              _buildCupertinoSwitch(
+                'Client Disconnect Notifications',
+                clientDisconnectNotifications,
+                (bool value) {
+                  setState(() {
+                    clientDisconnectNotifications = value;
+                    _updateOptionsList(
+                        'Client Disconnect Notifications', value);
+                  });
+                },
+              ),
+              // Dropdown pour Broadcast Pool Interval
+              DropdownButton<String>(
+                value: broadcastPoolInterval,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    broadcastPoolInterval = newValue!;
+                  });
+                },
+                items: <String>['Normal', 'Low', 'High', 'Maximum']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+              // Champs pour les adresses MAC
+              TextFormField(
+                initialValue: targetMacAddress,
+                decoration: InputDecoration(labelText: 'Target MAC Address'),
+                onChanged: (value) {
+                  targetMacAddress = value;
+                },
+              ),
+              TextFormField(
+                initialValue: sourceMacAddress,
+                decoration: InputDecoration(labelText: 'Source MAC Address'),
+                onChanged: (value) {
+                  sourceMacAddress = value;
+                },
+              ),
+              _buildCupertinoSwitch(
+                'Randomize Source MAC',
+                randomizeSourceMAC,
+                (bool value) {
+                  setState(() {
+                    randomizeSourceMAC = value;
+                  });
+                },
+              ),
             ],
+            const SizedBox(height: 20),
             // Bouton Sauvegarder
             ElevatedButton(
               onPressed: () {
@@ -190,12 +189,6 @@ class _PineAPSettingsPageState extends State<PineAPSettingsPage> {
                   'mode': mode,
                   'impersonate': impersonate,
                   'options': options,
-                  'logPineAPEvents': logPineAPEvents,
-                  'captureSSIDsToPool': captureSSIDsToPool,
-                  'clientConnectNotifications': clientConnectNotifications,
-                  'clientDisconnectNotifications':
-                      clientDisconnectNotifications,
-                  'advertiseAPImpersonationPool': advertiseAPImpersonationPool,
                   'broadcastPoolInterval': broadcastPoolInterval,
                   'targetMacAddress': targetMacAddress,
                   'sourceMacAddress': sourceMacAddress,
@@ -208,6 +201,17 @@ class _PineAPSettingsPageState extends State<PineAPSettingsPage> {
         ),
       ),
     );
+  }
+
+  // Fonction pour mettre à jour la liste des options en fonction des sélections
+  void _updateOptionsList(String option, bool isSelected) {
+    if (isSelected) {
+      if (!options.contains(option)) {
+        options.add(option);
+      }
+    } else {
+      options.remove(option);
+    }
   }
 
   // Fonction utilitaire pour construire un CupertinoSwitch avec un label
