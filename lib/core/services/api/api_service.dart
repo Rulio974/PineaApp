@@ -110,4 +110,10 @@ abstract class ApiService {
 
   @PUT("/api/settings/networking/ap/open")
   Future<dynamic> saveOpenAPSettings(@Body() Map<String, dynamic> body);
+
+  @GET("/api/settings/networking/ap/wpa")
+  Future<dynamic> getEvilApSettings();
+
+  @PUT("/api/settings/networking/ap/wpa")
+  Future<dynamic> saveEvilApSettings(@Body() Map<String, dynamic> body);
 }
