@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pineapp/views/pineAp/clients.dart';
+import 'package:pineapp/views/pineAp/entreprise.dart';
+import 'package:pineapp/views/pineAp/evilWpa.dart';
+import 'package:pineapp/views/pineAp/filtering.dart';
+import 'package:pineapp/views/pineAp/impersonation.dart';
+import 'package:pineapp/views/pineAp/openAp.dart';
 import 'package:pineapp/views/pineAp/pineAppPage.dart';
 
 class PineApHome extends StatefulWidget {
@@ -11,16 +17,14 @@ class PineApHome extends StatefulWidget {
 }
 
 class PineApPageState extends State<PineApHome> {
-  int currentPageIndex = 0; // Index de la page actuelle
+  int currentPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    currentPageIndex =
-        widget.page; // Initialise l'index avec la valeur de widget.page
+    currentPageIndex = widget.page;
   }
 
-  // Fonction appelée pour changer la page dynamiquement
   void changePage(int newIndex) {
     setState(() {
       currentPageIndex = newIndex;
@@ -30,22 +34,28 @@ class PineApPageState extends State<PineApHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildBody(currentPageIndex), // Affiche la page correcte
+      body: _buildBody(currentPageIndex),
     );
   }
 
-  // Fonction pour retourner le bon contenu en fonction de l'index
   Widget _buildBody(int index) {
     switch (index) {
       case 0:
-        return PineAPPage(); // Page Passive
+        return PineAPPage();
       case 1:
-        return Scaffold(
-            body: Center(child: Text("Active Mode"))); // Page Active
+        return OpenApPage();
+      case 2:
+        return EvilWpaPage();
+      case 3:
+        return EntreprisePage();
+      case 4:
+        return ImpersonationPage();
+      case 5:
+        return ClientsPage();
+      case 6:
+        return FilteringPage();
       default:
-        return Scaffold(
-            body: Center(
-                child: Text("Error"))); // Page par défaut en cas d'erreur
+        return const Scaffold(body: Center(child: Text("Error")));
     }
   }
 }

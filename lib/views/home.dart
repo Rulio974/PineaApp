@@ -17,7 +17,7 @@ class _HomeState extends State<Home> {
   int _reconPageIndex = 0;
   int _pineapPageIndex = 0;
   String _reconSubtitle = 'Scanning';
-  String _pineapSubtitle = 'Open Ap';
+  String _pineapSubtitle = 'PineAp';
   late ApiService _apiService;
   final dio = Dio();
 

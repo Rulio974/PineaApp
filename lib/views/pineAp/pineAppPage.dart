@@ -32,6 +32,13 @@ class _PineAPPageState extends State<PineAPPage> {
     _loadPineAPSettings(); // Charger les paramètres au démarrage
   }
 
+  String capitalizeFirstLetter(String word) {
+    if (word.isEmpty) {
+      return word; // Return empty string if input is empty
+    }
+    return word[0].toUpperCase() + word.substring(1);
+  }
+
   // Charger les paramètres actuels
   Future<void> _loadPineAPSettings() async {
     try {
@@ -134,7 +141,7 @@ class _PineAPPageState extends State<PineAPPage> {
                       children: [
                         Row(children: [
                           Text(
-                            'Advanced Mode', // Statique car basé sur les options
+                            '${capitalizeFirstLetter(mode)} Mode', // Statique car basé sur les options
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           ),
@@ -144,38 +151,48 @@ class _PineAPPageState extends State<PineAPPage> {
                             color: Colors.green,
                           ),
                         ]),
-                        const SizedBox(height: 30),
                         // Afficher toutes les options pour le mode Advanced
-                        Wrap(
-                          spacing: 8.0,
-                          runSpacing: 10.0,
-                          children: [
-                            _buildOptionChip(
-                              'Impersonate All Networks',
-                              impersonateAllNetworks,
-                            ),
-                            _buildOptionChip(
-                              'Log PineAP Events',
-                              logPineAPEvents,
-                            ),
-                            _buildOptionChip(
-                              'Capture SSIDs to Pool',
-                              captureSSIDsToPool,
-                            ),
-                            _buildOptionChip(
-                              'Client Connect Notifications',
-                              clientConnectNotifications,
-                            ),
-                            _buildOptionChip(
-                              'Client Disconnect Notifications',
-                              clientDisconnectNotifications,
-                            ),
-                            _buildOptionChip(
-                              'Advertise AP Impersonation Pool',
-                              advertiseAPImpersonationPool,
-                            ),
-                          ],
-                        ),
+                        if (mode == 'passive' || mode == 'active') ...[
+                          const SizedBox(height: 20),
+                          Text(
+                            mode == 'passive'
+                                ? 'In Passive Mode, the following PineAP features are enabled:\n\n• SSID Pool Collection\n• Event Logging'
+                                : 'In Active Mode, the following PineAP features are enabled:\n\n• SSID Pool Collection\n• Event Logging\n• SSID Pool Broadcasting',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ] else if (mode == 'advanced') ...[
+                          const SizedBox(height: 30),
+                          Wrap(
+                            spacing: 8.0,
+                            runSpacing: 10.0,
+                            children: [
+                              _buildOptionChip(
+                                'Impersonate All Networks',
+                                impersonateAllNetworks,
+                              ),
+                              _buildOptionChip(
+                                'Log PineAP Events',
+                                logPineAPEvents,
+                              ),
+                              _buildOptionChip(
+                                'Capture SSIDs to Pool',
+                                captureSSIDsToPool,
+                              ),
+                              _buildOptionChip(
+                                'Client Connect Notifications',
+                                clientConnectNotifications,
+                              ),
+                              _buildOptionChip(
+                                'Client Disconnect Notifications',
+                                clientDisconnectNotifications,
+                              ),
+                              _buildOptionChip(
+                                'Advertise AP Impersonation Pool',
+                                advertiseAPImpersonationPool,
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 20),
                         Align(
                           alignment: Alignment.bottomLeft,
@@ -218,16 +235,6 @@ class _PineAPPageState extends State<PineAPPage> {
                       ],
                     ),
                   ),
-                ),
-              ),
-              Container(
-                height: 400,
-                width: double.infinity,
-                margin: EdgeInsets.all(16),
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ],

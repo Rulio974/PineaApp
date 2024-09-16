@@ -104,4 +104,10 @@ abstract class ApiService {
   // Sauvegarder les paramètres PineAP
   @PUT("/api/pineap/settings")
   Future<dynamic> savePineAPSettings(@Body() Map<String, dynamic> body);
+
+  @GET("/api/settings/networking/ap/open")
+  Future<dynamic> getOpenAPSettings();
+
+  @PUT("/api/settings/networking/ap/open")
+  Future<dynamic> saveOpenAPSettings(@Body() Map<String, dynamic> body);
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as custom_badge;
 import 'package:heroicons/heroicons.dart';
 import 'package:pineapp/core/services/api/api_service.dart';
+import 'package:pineapp/core/utils/connectivity_check.dart';
 import 'package:pineapp/models/dashboard/notifications.dart';
 import 'package:pineapp/views/notifications/notifications.dart';
 
@@ -37,6 +38,8 @@ class _NotificationAppBarState extends State<NotificationAppBar> {
   @override
   void initState() {
     super.initState();
+    // NetworkUtils.checkPineappleAccess(context);
+
     selectedSubtitle = widget.currentSubtitle ?? _getInitialSubtitle();
   }
 

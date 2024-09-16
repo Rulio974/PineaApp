@@ -224,22 +224,26 @@ class _PineAPSettingsPageState extends State<PineAPSettingsPage> {
       final settingsData = {
         "mode": mode,
         "settings": {
-          "enablePineAP": true,
-          "autostartPineAP": true,
+          "enablePineAP": true, // Remplacé par true
+          "autostartPineAP": true, // Remplacé par true
           "armedPineAP": false,
-          "ap_channel": "6",
+          "ap_channel": "6", // Remplacé par 6
           "karma": true,
-          "logging": logPineAPEvents,
-          "connect_notifications": clientConnectNotifications,
-          "disconnect_notifications": clientDisconnectNotifications,
-          "capture_ssids": captureSSIDsToPool,
-          "beacon_responses": true,
-          "broadcast_ssid_pool": advertiseAPImpersonationPool,
+          "logging": logPineAPEvents, // Remplacé par logPineAPEvents
+          "connect_notifications":
+              clientConnectNotifications, // Remplacé par clientConnectNotifications
+          "disconnect_notifications":
+              clientDisconnectNotifications, // Remplacé par clientDisconnectNotifications
+          "capture_ssids":
+              captureSSIDsToPool, // Remplacé par captureSSIDsToPool
+          "beacon_responses": true, // Remplacé par true
+          "broadcast_ssid_pool":
+              advertiseAPImpersonationPool, // Remplacé par advertiseAPImpersonationPool
           "broadcast_ssid_pool_random": false,
-          "pineap_mac": sourceMacAddress,
-          "target_mac": targetMacAddress,
-          "beacon_response_interval": "NORMAL",
-          "beacon_interval": "NORMAL"
+          "pineap_mac": sourceMacAddress, // Remplacé par sourceMacAddress
+          "target_mac": targetMacAddress, // Remplacé par targetMacAddress
+          "beacon_response_interval": "NORMAL", // Laisse comme c'était
+          "beacon_interval": "NORMAL" // Laisse comme c'était
         }
       };
 
