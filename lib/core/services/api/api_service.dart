@@ -62,9 +62,18 @@ abstract class ApiService {
   @GET("/api/recon/scans/{scanId}")
   Future<APResults> getReconScanResults(@Path("scanId") int scanId);
 
+  @GET("/api/pineap/ssids")
+  Future<dynamic> getPineAPPool();
+
   // Add SSID to PineAP Pool
   @PUT("/api/pineap/ssids/ssid")
   Future<dynamic> addSsidToPineAPPool(@Body() Map<String, dynamic> body);
+
+  @DELETE("/api/pineap/ssids/ssid")
+  Future<dynamic> deleteSsidFromPineAPPool(@Body() Map<String, dynamic> body);
+
+  @DELETE('/api/pineap/ssids')
+  Future<dynamic> deleteAllSsidFromPineAPPool();
 
   // Add SSID to Filter
   @PUT("/api/pineap/filters/ssid/list")
