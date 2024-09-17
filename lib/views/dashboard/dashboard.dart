@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:pineapp/core/helpers/getLastScanId_helper.dart';
 import 'package:pineapp/core/services/api/api_service.dart';
+import 'package:pineapp/core/utils/navigationProvider.dart';
 import 'package:pineapp/core/utils/secure_token.dart';
 import 'package:pineapp/models/dashboard/cards.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -10,6 +11,7 @@ import 'package:pineapp/models/recon/recon_scan.dart';
 import 'package:pineapp/widgets/navigation/customAppBar.dart';
 import 'package:pineapp/widgets/dashboard/cards.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -167,11 +169,26 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
           SizedBox(height: espacement),
-          const Padding(
-            padding: EdgeInsets.only(left: 14),
-            child: Text(
-              "Clients Status",
-              style: TextStyle(fontSize: 20),
+          GestureDetector(
+            onTap: () {
+              Provider.of<NavigationProvider>(context, listen: false)
+                ..navigateTo(2) // Navigue vers l'onglet "PineAp Suite"
+                ..changePineapPage(5); // Sélectionne l'onglet "Clients"
+            },
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(left: 14),
+                  child: Text(
+                    "Clients Status",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                SizedBox(width: 10),
+                HeroIcon(HeroIcons.chevronRight,
+                    size: 20, color: Colors.blueGrey),
+              ],
             ),
           ),
           Row(
@@ -190,11 +207,26 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
           SizedBox(height: espacement),
-          const Padding(
-            padding: EdgeInsets.only(left: 14),
-            child: Text(
-              "SSID",
-              style: TextStyle(fontSize: 20),
+          GestureDetector(
+            onTap: () {
+              Provider.of<NavigationProvider>(context, listen: false)
+                ..navigateTo(2) // Navigue vers l'onglet "PineAp Suite"
+                ..changePineapPage(4); // Sélectionne l'onglet "Clients"
+            },
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(left: 14),
+                  child: Text(
+                    "Clients Status",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                SizedBox(width: 10),
+                HeroIcon(HeroIcons.chevronRight,
+                    size: 20, color: Colors.blueGrey),
+              ],
             ),
           ),
           Row(

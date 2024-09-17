@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:pineapp/core/utils/navigationProvider.dart';
 import 'package:pineapp/views/auth/login.dart';
 import 'package:pineapp/views/error/pineappleNotFound.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => NavigationProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

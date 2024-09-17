@@ -5,19 +5,23 @@ class SecondaryButton extends StatelessWidget {
   final String text;
   final HeroIcon? icon;
   final Color? borderColor;
+  final EdgeInsets? margin;
+  final EdgeInsets? padding;
 
   const SecondaryButton({
     Key? key,
     required this.text,
     this.icon,
     this.borderColor,
+    this.margin,
+    this.padding,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      padding: const EdgeInsets.all(8),
+      margin: margin ?? const EdgeInsets.symmetric(horizontal: 8),
+      padding: padding ?? const EdgeInsets.all(8),
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
@@ -27,10 +31,10 @@ class SecondaryButton extends StatelessWidget {
         children: [
           Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
           if (icon != null) ...[
-            icon!,
             const SizedBox(
               width: 10,
             ),
+            icon!,
           ]
         ],
       ),
